@@ -9,7 +9,7 @@ public class NFA
 
   public NFA( NFA src )
   {
-    this.transtbl = src.transtbl;
+    this.transtbl = ( Vector<Object> )src.transtbl.clone();
     this.start    = src.start;
     this.end      = src.end;
   }
@@ -87,7 +87,7 @@ public class NFA
       ri.add( Input.NONE );
     }
 
-    end++;
+    this.end++;
   }
 
   /** Renames all the NFA's states:
@@ -98,7 +98,7 @@ public class NFA
    */
   public void shiftStates( int shift )
   {
-    if ( shift <= 0 ) { return; }
+    if ( shift < 1 ) { return; }
 
     for ( int i = 0; i < shift; i++ )
     {
@@ -114,8 +114,8 @@ public class NFA
       for ( int j = 0; j < shift; j++ ) { ri.insertElementAt( Input.NONE, 0 ); }
     }
 
-    start += shift;
-    end   += shift;
+    this.start += shift;
+    this.end   += shift;
   }
 
   /** Fills states 0 up to src.count() with src's states.
@@ -155,7 +155,7 @@ public class NFA
         Input in = r.get( j );
 
         if      ( in == Input.NONE ) { c = '-';  }
-        else if ( in == Input.EPS  ) { c = 'E';  }
+        else if ( in == Input.EPS  ) { c = '\u03bb';  }
         else                         { c = in.v; }
 
         System.out.print( String.format( " %c", c ) );
@@ -163,16 +163,37 @@ public class NFA
 
       System.out.println();
     }
+
+    System.out.println();
   }
 
-  public NFA buildNFAAlternation( NFA nfa1, NFA nfa2 )
+  public static NFA buildNFAAlternation( NFA nfa1, NFA nfa2 )
   {
+    //        +-----------------+
+    //        | .-.         .-. |
+    //     +-->(   )  N(s) (   )+--+
+    //     |  | `-'         `-' |  |
+    //     |  +-----------------+  |
+    //     |                       v
+    //    .-.                    +---+
+    //   ( S )                   | F |
+    //    `-'                    +---+
+    //     |  +-----------------+  ^
+    //     |  | .-.         .-. |  |
+    //     +--|(   )  N(t) (   )|--+
+    //        | `-'         `-' |
+    //        +-----------------+
+    //
+    // The new nfaUnion contain all the states in nfa1 and nfa2,
+    // plus a new initial and final states.  First will come the
+    // new initial state, then nfa1's states, then nfa2's states,
+    // then the new final state.
+
     nfa1.shiftStates( 1 );            // make room for the new initial state
     nfa2.shiftStates( nfa1.count() ); // make room for nfa1's states
 
-    NFA nfaUnion = new NFA( nfa2 );
-    nfaUnion.fillStates( nfa1 );
-    nfaUnion.shiftStates( 1 );
+    NFA nfaUnion = new NFA( nfa2 );   // create a new nfa and initialize it
+    nfaUnion.fillStates( nfa1 );      // nfa1's states take their places in the new nfa
 
     nfaUnion.addTransition( 0, nfa1.start, Input.EPS );
     nfaUnion.addTransition( 0, nfa2.start, Input.EPS );
@@ -187,7 +208,7 @@ public class NFA
     return nfaUnion;
   }
 
-  public NFA buildNFAConcatenation( NFA nfa1, NFA nfa2 )
+  public static NFA buildNFAConcatenation( NFA nfa1, NFA nfa2 )
   {
     // Make room for nfa1's states.  First will come nfa1, then
     // nfa2 (nfa2's initial state would be overlapped with nfa1's
@@ -212,7 +233,7 @@ public class NFA
     return nfaConcat;
   }
 
-  public NFA buildNFAKleeneStar( NFA nfa )
+  public static NFA buildNFAKleeneStar( NFA nfa )
   {
     nfa.shiftStates( 1 );
 
@@ -231,7 +252,7 @@ public class NFA
     return nfaKleeneStar;
   }
 
-  public NFA buildNFABasic( Input in )
+  public static NFA buildNFABasic( Input in )
   {
     NFA nfa = new NFA( 2, 0, 1 );
     nfa.addTransition( 0, 1, in );
@@ -262,8 +283,8 @@ public class NFA
 
     nfa.dumpInternalTranstbl();
 
-    nfa.appendEmptyState(); System.out.println(); nfa.dumpInternalTranstbl();
-    nfa.shiftStates( 3 );   System.out.println(); nfa.dumpInternalTranstbl();
+    nfa.appendEmptyState(); nfa.dumpInternalTranstbl();
+    nfa.shiftStates( 3 );   nfa.dumpInternalTranstbl();
 
     NFA anotherNFA = new NFA( 4, 0, 3 );
 
@@ -274,7 +295,36 @@ public class NFA
     anotherNFA.addTransition( 2, 1, new Input( 'a' ) );
     anotherNFA.addTransition( 3, 1, new Input( 'a' ) );
 
-    System.out.println(); anotherNFA.dumpInternalTranstbl();
-    nfa.fillStates( anotherNFA ); System.out.println(); nfa.dumpInternalTranstbl();
+    anotherNFA.dumpInternalTranstbl();
+    nfa.fillStates( anotherNFA ); nfa.dumpInternalTranstbl();
+
+    /// RegEx: s|t
+    /// We're about to construct a composite NFA that recognizes s|t
+
+    NFA regex_s = NFA.buildNFABasic( new Input( 's' ) );
+    NFA regex_t = NFA.buildNFABasic( new Input( 't' ) );
+    NFA regex_r = NFA.buildNFABasic( new Input( 'r' ) );
+
+    NFA regex_sORt = NFA.buildNFAAlternation( regex_s, regex_t );
+    regex_sORt.dumpInternalTranstbl();
+
+    // RegEx: st
+    // A composite NFA that recognizes st
+
+    regex_s = NFA.buildNFABasic( new Input( 's' ) );
+    regex_t = NFA.buildNFABasic( new Input( 't' ) );
+
+    NFA intermediateNFA = NFA.buildNFAConcatenation( regex_r, regex_s );
+    NFA regex_rst = NFA.buildNFAConcatenation( intermediateNFA, regex_t );
+    regex_rst.dumpInternalTranstbl();
+
+    // RegEx: s*
+    // A composite NFA tha recognizes s*
+
+    regex_s = NFA.buildNFABasic( new Input( 's' ) );
+    regex_t = NFA.buildNFABasic( new Input( 't' ) );
+
+    NFA regex_sStar = NFA.buildNFAKleeneStar( regex_s );
+    regex_sStar.dumpInternalTranstbl();
   }
 }

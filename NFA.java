@@ -162,13 +162,13 @@ public class NFA implements Cloneable
     System.out.println();
 
     System.out.print( "  " );
-    for ( int i = 0; i < count(); i++ ) { System.out.print( " " + i ); }
+    for ( int i = 0; i < count(); i++ ) { System.out.print( " " + i % 10 ); }
     System.out.print( "\n\n" );
 
     for ( int i = 0; i < count(); i++ )
     {
       Vector<Input> r = ( Vector<Input> )transtbl.get( i );
-      System.out.print( i + " " );
+      System.out.print( i % 10 + " " );
 
       for ( int j = 0; j < count(); j++ )
       {
@@ -330,28 +330,33 @@ public class NFA implements Cloneable
     NFA regex_t = NFA.buildNFABasic( new Input( 't' ) );
 
     /// RegEx: s|t
-    /// We're about to construct a composite NFA that recognizes s|t
 
-    NFA regex_s_or_t = NFA.buildNFAAlternation( regex_s, regex_t );
-    regex_s_or_t.dumpInternalTranstbl();
+    NFA regex_s_OR_t = NFA.buildNFAAlternation( regex_s, regex_t );
+    regex_s_OR_t.dumpInternalTranstbl();
 
     // RegEx: st
-    // A composite NFA that recognizes st
 
-    NFA intermediateNFA = NFA.buildNFAConcatenation( regex_r, regex_s );
-    NFA regex_rst = NFA.buildNFAConcatenation( intermediateNFA, regex_t );
+    NFA regex_rs = NFA.buildNFAConcatenation( regex_r, regex_s );
+    NFA regex_rst = NFA.buildNFAConcatenation( regex_rs, regex_t );
     regex_rst.dumpInternalTranstbl();
 
     // RegEx: s*
-    // A composite NFA tha recognizes s*
 
-    NFA regex_sStar = NFA.buildNFAKleeneStar( regex_s );
-    regex_sStar.dumpInternalTranstbl();
+    NFA regex_s_STAR = NFA.buildNFAKleeneStar( regex_s );
+    regex_s_STAR.dumpInternalTranstbl();
 
     // RegEx: s*|ts
 
     NFA tsNFA = NFA.buildNFAConcatenation( regex_t, regex_s );
-    NFA regex_sStar_or_ts = NFA.buildNFAAlternation( regex_sStar, tsNFA );
-    regex_sStar_or_ts.dumpInternalTranstbl();
+    NFA regex_s_STAR_or_ts = NFA.buildNFAAlternation( regex_s_STAR, tsNFA );
+    regex_s_STAR_or_ts.dumpInternalTranstbl();
+
+    // RegEx: (s|t)*stt
+
+    NFA regex_s_OR_t_STAR = NFA.buildNFAKleeneStar( regex_s_OR_t );
+    NFA regex_st = NFA.buildNFAConcatenation( regex_s, regex_t );
+    NFA regex_stt = NFA.buildNFAConcatenation( regex_st, regex_t );
+    NFA regex_s_OR_t_STAR_stt = NFA.buildNFAConcatenation( regex_s_OR_t_STAR, regex_stt );
+    regex_s_OR_t_STAR_stt.dumpInternalTranstbl();
   }
 }

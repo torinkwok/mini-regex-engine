@@ -7,7 +7,7 @@ public class NFA implements Cloneable
 
   public final Vector<Object> transtbl;
 
-  public Object clone() { return new NFA( this ); }
+  public NFA clone() { return new NFA( this ); }
 
   public NFA( NFA src )
   {
@@ -136,7 +136,7 @@ public class NFA implements Cloneable
    */
   public void fillStates( NFA nfa )
   {
-    NFA src = ( NFA )nfa.clone();
+    NFA src = nfa.clone();
     NFA dst = this;
     int srcsz = src.count();
 
@@ -187,8 +187,8 @@ public class NFA implements Cloneable
 
   public static NFA buildNFAAlternation( NFA n1, NFA n2 )
   {
-    NFA nfa1 = ( NFA )n1.clone();
-    NFA nfa2 = ( NFA )n2.clone();
+    NFA nfa1 = n1.clone();
+    NFA nfa2 = n2.clone();
 
     //        +-----------------+
     //        | .-.         .-. |
@@ -231,8 +231,8 @@ public class NFA implements Cloneable
 
   public static NFA buildNFAConcatenation( NFA n1, NFA n2 )
   {
-    NFA nfa1 = ( NFA )n1.clone();
-    NFA nfa2 = ( NFA )n2.clone();
+    NFA nfa1 = n1.clone();
+    NFA nfa2 = n2.clone();
 
     // Make room for nfa1's states.  First will come nfa1, then
     // nfa2 (nfa2's initial state would be overlapped with nfa1's
@@ -259,7 +259,7 @@ public class NFA implements Cloneable
 
   public static NFA buildNFAKleeneStar( NFA n )
   {
-    NFA nfa = ( NFA )n.clone();
+    NFA nfa = n.clone();
 
     nfa.shiftStates( 1 );
 

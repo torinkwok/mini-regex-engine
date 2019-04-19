@@ -160,9 +160,14 @@ public class NFA implements Cloneable
     System.out.println( "--------------------" );
     System.out.println();
 
+    System.out.print( "  " );
+    for ( int i = 0; i < count(); i++ ) { System.out.print( " " + i ); }
+    System.out.print( "\n\n" );
+
     for ( int i = 0; i < count(); i++ )
     {
       Vector<Input> r = ( Vector<Input> )transtbl.get( i );
+      System.out.print( i + " " );
 
       for ( int j = 0; j < count(); j++ )
       {
@@ -183,13 +188,6 @@ public class NFA implements Cloneable
   public static NFA buildNFAAlternation( NFA n1, NFA n2 )
   {
     NFA nfa1 = ( NFA )n1.clone();
-
-    /* System.out.println( "DEBUG BELOW" ); */
-    /* n1.dumpInternalTranstbl(); */
-    /* n1.shiftStates( 3 ); */
-    /* nfa1.dumpInternalTranstbl(); */
-    /* System.out.println( "DEBUG ABOVE" ); */
-
     NFA nfa2 = ( NFA )n2.clone();
 
     //        +-----------------+
@@ -333,8 +331,8 @@ public class NFA implements Cloneable
     /// RegEx: s|t
     /// We're about to construct a composite NFA that recognizes s|t
 
-    NFA regex_sORt = NFA.buildNFAAlternation( regex_s, regex_t );
-    regex_sORt.dumpInternalTranstbl();
+    NFA regex_s_or_t = NFA.buildNFAAlternation( regex_s, regex_t );
+    regex_s_or_t.dumpInternalTranstbl();
 
     // RegEx: st
     // A composite NFA that recognizes st
@@ -350,5 +348,9 @@ public class NFA implements Cloneable
     regex_sStar.dumpInternalTranstbl();
 
     // RegEx: s*|ts
+
+    NFA tsNFA = NFA.buildNFAConcatenation( regex_t, regex_s );
+    NFA regex_sStar_or_ts = NFA.buildNFAAlternation( regex_sStar, tsNFA );
+    regex_sStar_or_ts.dumpInternalTranstbl();
   }
 }

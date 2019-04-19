@@ -7,6 +7,7 @@ public class NFA implements Cloneable
 
   public final Vector<Object> transtbl;
 
+  @Override
   public NFA clone() { return new NFA( this ); }
 
   public NFA( NFA src )

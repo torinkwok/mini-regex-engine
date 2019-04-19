@@ -169,21 +169,21 @@ public class NFA
     nfa1.shiftStates( 1 );            // make room for the new initial state
     nfa2.shiftStates( nfa1.count() ); // make room for nfa1's states
 
-    NFA unifiedNFA = new NFA( nfa2 );
-    unifiedNFA.fillStates( nfa1 );
-    unifiedNFA.shiftStates( 1 );
+    NFA nfaAlter = new NFA( nfa2 );
+    nfaAlter.fillStates( nfa1 );
+    nfaAlter.shiftStates( 1 );
 
-    unifiedNFA.addTransition( 0, nfa1._start, Input.EPS );
-    unifiedNFA.addTransition( 0, nfa2._start, Input.EPS );
-    unifiedNFA._start = 0;
+    nfaAlter.addTransition( 0, nfa1._start, Input.EPS );
+    nfaAlter.addTransition( 0, nfa2._start, Input.EPS );
+    nfaAlter._start = 0;
 
-    unifiedNFA.appendEmptyState();
-    unifiedNFA._end = unifiedNFA.count() - 1;
+    nfaAlter.appendEmptyState();
+    nfaAlter._end = nfaAlter.count() - 1;
 
-    unifiedNFA.addTransition( nfa1._end, unifiedNFA._end, Input.EPS );
-    unifiedNFA.addTransition( nfa2._end, unifiedNFA._end, Input.EPS );
+    nfaAlter.addTransition( nfa1._end, nfaAlter._end, Input.EPS );
+    nfaAlter.addTransition( nfa2._end, nfaAlter._end, Input.EPS );
 
-    return unifiedNFA;
+    return nfaAlter;
   }
 
   public NFA buildNFAConcatenation( NFA nfa1, NFA nfa2 )
@@ -194,21 +194,21 @@ public class NFA
     //
     nfa2.shiftStates( nfa1.count() - 1 );
 
-    NFA unifiedNFA = new NFA( nfa2 );
+    NFA nfaConcat = new NFA( nfa2 );
 
-    // nfa1's states take their places in unifiedNFA NOTE: nfa1's
+    // nfa1's states take their places in nfaConcat NOTE: nfa1's
     // final state overwrites nfa2's initial state, thus we get
     // the desired merge automagically (the transition from
     // nfa2's initial state now transits from nfa1's final state)
     // 
-    unifiedNFA.fillStates( nfa1 );
+    nfaConcat.fillStates( nfa1 );
 
     // Set the new initial state (the final state stays nfa2's
     // final state, and was already copied)
     //
-    unifiedNFA._start = nfa1._start;
+    nfaConcat._start = nfa1._start;
 
-    return unifiedNFA;
+    return nfaConcat;
   }
 
   public NFA buildNFAKleeneStar( NFA nfa )

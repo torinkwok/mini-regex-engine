@@ -1,15 +1,29 @@
 import java.util.Vector;
 
-public class NFA
+public class NFA implements Cloneable
 {
   public int start;
   public int end;
 
   public final Vector<Object> transtbl;
 
+  public Object clone() { return new NFA( this ); }
+
   public NFA( NFA src )
   {
-    this.transtbl = ( Vector<Object> )src.transtbl.clone();
+    Vector<Object> cloned_transtbl = new Vector<Object>( src.count() );
+    for ( int i = 0; i < src.count(); i++ )
+    {
+      Vector<Input> src_r = ( Vector<Input> )src.transtbl.get( i );
+      Vector<Input> cloned_r = new Vector<Input>( src.count() );
+      for ( int j = 0; j < src.count(); j++ )
+      {
+        cloned_r.add( src_r.get( j ) );
+      }
+      cloned_transtbl.add( cloned_r );
+    }
+
+    this.transtbl = cloned_transtbl;
     this.start    = src.start;
     this.end      = src.end;
   }
@@ -29,7 +43,7 @@ public class NFA
 
     for ( int i = 0; i < size; i++ )
     {
-      Vector<Input> row = new Vector<Input>();
+      Vector<Input> row = new Vector<Input>( size );
       for ( int j = 0; j < size; j++ ) { row.add( Input.NONE ); }
 
       transtbl.add( row );
@@ -65,7 +79,7 @@ public class NFA
         {
           System.out.print( String.format( "Transitions from s%d to s%d on input ", from, to ) );
 
-          if   ( in == Input.EPS ) { System.out.println( "eps"); }
+          if   ( in == Input.EPS ) { System.out.println( in.v ); }
           else                     { System.out.println( "'" + in.v + "'" ); }
         }
       }
@@ -120,8 +134,9 @@ public class NFA
 
   /** Fills states 0 up to src.count() with src's states.
    */
-  public void fillStates( NFA src )
+  public void fillStates( NFA nfa )
   {
+    NFA src = ( NFA )nfa.clone();
     NFA dst = this;
     int srcsz = src.count();
 
@@ -153,9 +168,7 @@ public class NFA
       {
         char c;
         Input in = r.get( j );
-
         if      ( in == Input.NONE ) { c = '-';  }
-        else if ( in == Input.EPS  ) { c = '\u03bb';  }
         else                         { c = in.v; }
 
         System.out.print( String.format( " %c", c ) );
@@ -167,8 +180,18 @@ public class NFA
     System.out.println();
   }
 
-  public static NFA buildNFAAlternation( NFA nfa1, NFA nfa2 )
+  public static NFA buildNFAAlternation( NFA n1, NFA n2 )
   {
+    NFA nfa1 = ( NFA )n1.clone();
+
+    /* System.out.println( "DEBUG BELOW" ); */
+    /* n1.dumpInternalTranstbl(); */
+    /* n1.shiftStates( 3 ); */
+    /* nfa1.dumpInternalTranstbl(); */
+    /* System.out.println( "DEBUG ABOVE" ); */
+
+    NFA nfa2 = ( NFA )n2.clone();
+
     //        +-----------------+
     //        | .-.         .-. |
     //     +-->(   )  N(s) (   )+--+
@@ -208,8 +231,11 @@ public class NFA
     return nfaUnion;
   }
 
-  public static NFA buildNFAConcatenation( NFA nfa1, NFA nfa2 )
+  public static NFA buildNFAConcatenation( NFA n1, NFA n2 )
   {
+    NFA nfa1 = ( NFA )n1.clone();
+    NFA nfa2 = ( NFA )n2.clone();
+
     // Make room for nfa1's states.  First will come nfa1, then
     // nfa2 (nfa2's initial state would be overlapped with nfa1's
     // final state
@@ -233,8 +259,10 @@ public class NFA
     return nfaConcat;
   }
 
-  public static NFA buildNFAKleeneStar( NFA nfa )
+  public static NFA buildNFAKleeneStar( NFA n )
   {
+    NFA nfa = ( NFA )n.clone();
+
     nfa.shiftStates( 1 );
 
     NFA nfaKleeneStar = new NFA( nfa );
@@ -298,21 +326,18 @@ public class NFA
     anotherNFA.dumpInternalTranstbl();
     nfa.fillStates( anotherNFA ); nfa.dumpInternalTranstbl();
 
-    /// RegEx: s|t
-    /// We're about to construct a composite NFA that recognizes s|t
-
+    NFA regex_r = NFA.buildNFABasic( new Input( 'r' ) );
     NFA regex_s = NFA.buildNFABasic( new Input( 's' ) );
     NFA regex_t = NFA.buildNFABasic( new Input( 't' ) );
-    NFA regex_r = NFA.buildNFABasic( new Input( 'r' ) );
+
+    /// RegEx: s|t
+    /// We're about to construct a composite NFA that recognizes s|t
 
     NFA regex_sORt = NFA.buildNFAAlternation( regex_s, regex_t );
     regex_sORt.dumpInternalTranstbl();
 
     // RegEx: st
     // A composite NFA that recognizes st
-
-    regex_s = NFA.buildNFABasic( new Input( 's' ) );
-    regex_t = NFA.buildNFABasic( new Input( 't' ) );
 
     NFA intermediateNFA = NFA.buildNFAConcatenation( regex_r, regex_s );
     NFA regex_rst = NFA.buildNFAConcatenation( intermediateNFA, regex_t );
@@ -321,10 +346,9 @@ public class NFA
     // RegEx: s*
     // A composite NFA tha recognizes s*
 
-    regex_s = NFA.buildNFABasic( new Input( 's' ) );
-    regex_t = NFA.buildNFABasic( new Input( 't' ) );
-
     NFA regex_sStar = NFA.buildNFAKleeneStar( regex_s );
     regex_sStar.dumpInternalTranstbl();
+
+    // RegEx: s*|ts
   }
 }

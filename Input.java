@@ -1,9 +1,10 @@
-public class Input
+public final class Input
 {
   public final Character v;
 
   public  Input( char v )      { this.v = v;    }
   public  Input( Character v ) { this.v = v;    }
+
   private Input()              { this.v = null; }
 
   public boolean equals( Object o )
@@ -16,7 +17,7 @@ public class Input
     return this.v.equals( in.v );
   }
 
-  public static Input EPS  = new Input( '\n' );
+  public static Input EPS  = new Input( '\u03bb' );
   public static Input NONE = new Input();
 
   public static void main( String args[] )

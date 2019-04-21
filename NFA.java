@@ -349,7 +349,7 @@ public class NFA implements Cloneable
    *  like to know which states in the NFA are reachable from T
    *  with the input A.
    */
-  public Set<Integer> _move( Set<Integer> T, Input A )
+  public Set<Integer> _nextStates( Set<Integer> T, Input A )
   {
     // The function traverses the set T, and looks for
     // transitions on the given input, returning the states that
@@ -452,6 +452,6 @@ public class NFA implements Cloneable
     Set<Integer> s = new HashSet<>();
     s.add( 6 );
     System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
-    System.out.println( s = regex_s_OR_t_STAR_stt._move( s, new Input( 's' ) ) );
+    System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
   }
 }

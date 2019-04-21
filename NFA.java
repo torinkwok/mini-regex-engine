@@ -345,6 +345,27 @@ public class NFA implements Cloneable
     return closure;
   }
 
+  public Set<Integer> _move( Set<Integer> T, Input A )
+  {
+    Set<Integer> states = new HashSet<>();
+
+    if ( A == Input.NONE || A == Input.EPS )
+      return states;
+
+    for ( int t : T )
+    {
+      Vector<Input> r = ( Vector<Input> )transtbl.get( t );
+      for ( int c = 0; c < count(); c++ )
+      {
+        Input in = r.get( c );
+        if ( in == Input.EPS || in == Input.NONE ) continue;
+        if ( in.equals( A ) )                      states.add( c );
+      }
+    }
+
+    return states;
+  }
+
   public static void main( String args[] )
   {
     NFA nfa = new NFA( 11, 0, 10 ); 
@@ -421,5 +442,6 @@ public class NFA implements Cloneable
     Set<Integer> s = new HashSet<>();
     s.add( 6 );
     System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
+    System.out.println( s = regex_s_OR_t_STAR_stt._move( s, new Input( 's' ) ) );
   }
 }

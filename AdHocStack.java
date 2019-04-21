@@ -7,11 +7,15 @@ public class AdHocStack<T>
   public int     size()     { return _N;        }
   public int     capacity() { return _a.length; }
 
-  public void _resize( int new_sz )
+  private void _resize( int new_sz )
   {
+    if ( _N > new_sz )
+      throw new RuntimeException( "Illegal new size of stack's internal strorage" );
+
     T[] buffer = (T[]) new Object[ new_sz ];
     for ( int i = 0; i < _N; i++ )
       buffer[i] = _a[i];
+
     _a = buffer;
   }
 
@@ -24,7 +28,10 @@ public class AdHocStack<T>
   public T pop()
   {
     T popped = _a[--_N];
-    if ( size() == capacity() / 4 ) _resize( capacity() / 2 );
+
+    if ( size() > 0 && size() == capacity() / 4 )
+      _resize( capacity() / 2 );
+
     return popped;
   }
 }

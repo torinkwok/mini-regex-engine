@@ -1,4 +1,4 @@
-import java.util.Vector;
+import java.util.*;
 
 public class NFA implements Cloneable
 {
@@ -286,6 +286,44 @@ public class NFA implements Cloneable
     return nfa;
   }
 
+  public Set<Integer> _epsClosure( Set<Integer> T )
+  {
+    Set<Integer> closure = new HashSet<>();
+    if ( T.isEmpty() ) return closure;
+
+    AdHocStack<Integer> stack = new AdHocStack<>();
+
+    for ( int t : T )
+    {
+      stack.push( t );
+
+      while ( !stack.isEmpty() )
+      {
+        t = stack.pop();
+
+        Vector<Input> r = ( Vector<Input> ) transtbl.get( t );
+        Set<Integer> U = new HashSet<>();
+
+        U.add( t );
+
+        for ( int c = 0; c < count(); c++ )
+          if ( r.get( c ) == Input.EPS )
+            U.add( c );
+
+        for ( int u : U )
+        {
+          if ( !closure.contains( u ) )
+            {
+              closure.add( u );
+              stack.push( u );
+            }
+        }
+      }
+    }
+
+    return closure;
+  }
+
   public static void main( String args[] )
   {
     NFA nfa = new NFA( 11, 0, 10 ); 
@@ -359,15 +397,7 @@ public class NFA implements Cloneable
     NFA regex_s_OR_t_STAR_stt = NFA.buildNFAConcatenation( regex_s_OR_t_STAR, regex_stt );
     regex_s_OR_t_STAR_stt.dumpInternalTranstbl();
 
-    // RegEx #5: (s|t)*(ss|tt)(s|t)*
-
-    NFA regex_ss = NFA.buildNFAConcatenation( regex_s, regex_s );
-    NFA regex_tt = NFA.buildNFAConcatenation( regex_t, regex_t );
-    NFA regex_5 =
-      NFA.buildNFAConcatenation(
-        NFA.buildNFAConcatenation( regex_s_OR_t_STAR,
-                                   NFA.buildNFAAlternation( regex_ss, regex_tt ) ),
-        regex_s_OR_t_STAR );
-    regex_5.dumpInternalTranstbl();
+    Set<Integer> s = new HashSet<>(); s.add( 5 ); // s.add( 1 );
+    System.out.println( regex_s_OR_t_STAR_stt._epsClosure( s ) );
   }
 }

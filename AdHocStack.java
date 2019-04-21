@@ -19,7 +19,7 @@ public class AdHocStack<T>
   {
     if ( size() == capacity() ) _resize( capacity() * 2 );
     _a[_N++] = ele;
-  }p
+  }
 
   public T pop()
   {

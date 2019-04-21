@@ -397,7 +397,8 @@ public class NFA implements Cloneable
     NFA regex_s_OR_t_STAR_stt = NFA.buildNFAConcatenation( regex_s_OR_t_STAR, regex_stt );
     regex_s_OR_t_STAR_stt.dumpInternalTranstbl();
 
-    Set<Integer> s = new HashSet<>(); s.add( 5 ); // s.add( 1 );
-    System.out.println( regex_s_OR_t_STAR_stt._epsClosure( s ) );
+    Set<Integer> s = new HashSet<>();
+    s.add( 6 );
+    System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
   }
 }

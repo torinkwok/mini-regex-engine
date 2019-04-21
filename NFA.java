@@ -345,11 +345,21 @@ public class NFA implements Cloneable
     return closure;
   }
 
+  /** Given T - a set of NFA states, and A - an input, we would
+   *  like to know which states in the NFA are reachable from T
+   *  with the input A.
+   */
   public Set<Integer> _move( Set<Integer> T, Input A )
   {
+    // The function traverses the set T, and looks for
+    // transitions on the given input, returning the states that
+    // can be reached. It doesn't take into account the *eps*
+    // transitions from those states - there's eps-closure
+    // algorithm for that.
+
     Set<Integer> states = new HashSet<>();
 
-    if ( A == Input.NONE || A == Input.EPS )
+    if ( A == Input.EPS || A == Input.NONE )
       return states;
 
     for ( int t : T )

@@ -286,8 +286,29 @@ public class NFA implements Cloneable
     return nfa;
   }
 
+  /** Given N - an NFA and T - a set of NFA states, we would like
+   *  to know which states in N are reachable from states T by
+   *  *eps* transitions. eps-closure is an algorithm that answers
+   *  this question.
+   *
+   *  inputs: T - set of NFA states
+   *  output: eps-closure(T) - states reachable from T by eps transitions
+   */
   public Set<Integer> _epsClosure( Set<Integer> T )
   {
+    // This algorithm iteratively finds all the states reachable
+    // by *eps* transitions from the states T. First, the states
+    // T themselves are added to the output. Then, one by one the
+    // states are checked for *eps* transitions, and the states
+    // these transitions lead to are also added to the output,
+    // and are pushed onto the stack (in order to be checked for
+    // *eps* transitions).
+    //
+    // The process proceeds iteratively, until no more states can be
+    // reached with *eps* transitions only. For instance, for the
+    // (s|t)*stt NFA above, eps-closure({0}) = {0, 1, 2, 4, 7},
+    // eps-closure({8, 9}) = {8, 9}, etc..
+
     Set<Integer> closure = new HashSet<>();
     if ( T.isEmpty() ) return closure;
 

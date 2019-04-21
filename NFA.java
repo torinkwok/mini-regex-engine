@@ -329,34 +329,45 @@ public class NFA implements Cloneable
     NFA regex_s = NFA.buildNFABasic( new Input( 's' ) );
     NFA regex_t = NFA.buildNFABasic( new Input( 't' ) );
 
-    /// RegEx: s|t
+    /// RegEx #0: s|t
 
     NFA regex_s_OR_t = NFA.buildNFAAlternation( regex_s, regex_t );
     regex_s_OR_t.dumpInternalTranstbl();
 
-    // RegEx: st
+    // RegEx #1: st
 
     NFA regex_rs = NFA.buildNFAConcatenation( regex_r, regex_s );
     NFA regex_rst = NFA.buildNFAConcatenation( regex_rs, regex_t );
     regex_rst.dumpInternalTranstbl();
 
-    // RegEx: s*
+    // RegEx #2: s*
 
     NFA regex_s_STAR = NFA.buildNFAKleeneStar( regex_s );
     regex_s_STAR.dumpInternalTranstbl();
 
-    // RegEx: s*|ts
+    // RegEx #3: s*|ts
 
     NFA tsNFA = NFA.buildNFAConcatenation( regex_t, regex_s );
     NFA regex_s_STAR_or_ts = NFA.buildNFAAlternation( regex_s_STAR, tsNFA );
     regex_s_STAR_or_ts.dumpInternalTranstbl();
 
-    // RegEx: (s|t)*stt
+    // RegEx #4: (s|t)*stt
 
     NFA regex_s_OR_t_STAR = NFA.buildNFAKleeneStar( regex_s_OR_t );
     NFA regex_st = NFA.buildNFAConcatenation( regex_s, regex_t );
     NFA regex_stt = NFA.buildNFAConcatenation( regex_st, regex_t );
     NFA regex_s_OR_t_STAR_stt = NFA.buildNFAConcatenation( regex_s_OR_t_STAR, regex_stt );
     regex_s_OR_t_STAR_stt.dumpInternalTranstbl();
+
+    // RegEx #5: (s|t)*(ss|tt)(s|t)*
+
+    NFA regex_ss = NFA.buildNFAConcatenation( regex_s, regex_s );
+    NFA regex_tt = NFA.buildNFAConcatenation( regex_t, regex_t );
+    NFA regex_5 =
+      NFA.buildNFAConcatenation(
+        NFA.buildNFAConcatenation( regex_s_OR_t_STAR,
+                                   NFA.buildNFAAlternation( regex_ss, regex_tt ) ),
+        regex_s_OR_t_STAR );
+    regex_5.dumpInternalTranstbl();
   }
 }

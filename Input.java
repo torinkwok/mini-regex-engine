@@ -17,7 +17,19 @@ public final class Input
     return this.v.equals( in.v );
   }
 
-  public static Input EPS  = new Input( '\u03bb' );
+  /** Epsilon (eps) transitions are allowed in a NFA. That is,
+   *  there may be a transition from state to state given "no
+   *  input".
+   *
+   *  By definition, a Deterministic Finite Automaton is a
+   *  special case of a NFA, in which:
+   *
+   *    1. No state has an eps-transition
+   *    2. For each state S and input a, there is at most one
+   *    edge labeled a leaving S.
+   */
+  public static Input EPS  = new Input( '\u03b5' );
+
   public static Input NONE = new Input();
 
   public static void main( String args[] )

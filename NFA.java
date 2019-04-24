@@ -37,7 +37,7 @@ public class NFA implements Cloneable
     assert( isLegalState( start ) );
     assert( isLegalState( end ) );
 
-    this transtbl = new Vector<>( size );
+    this.transtbl = new Vector<>( size );
     this.start    = start;
     this.end      = end;
 
@@ -55,6 +55,13 @@ public class NFA implements Cloneable
 
   public int     count()               { return transtbl.size();      }
   public boolean isLegalState( int s ) { return s >= 0 || s < count(); }
+
+  // private DFA _subsetConstruction( 
+
+  // public DFA subsetConstruction()
+  // {
+    
+  // }
 
   public void addTransition( int from, int to, Input in )
   {

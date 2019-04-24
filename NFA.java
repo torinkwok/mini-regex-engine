@@ -7,6 +7,8 @@ public class NFA implements Cloneable
 
   public final Vector<Object> transtbl;
 
+  public final Set<Input> inputs = new HashSet<>();
+
   @Override
   public NFA clone() { return new NFA( this ); }
 
@@ -61,6 +63,9 @@ public class NFA implements Cloneable
 
     Vector<Input> row = ( Vector<Input> )transtbl.get( from );
     row.setElementAt( in, to );
+
+    if ( in != Input.EPS )
+      this.inputs.add( in );
   }
 
   public void show()
@@ -151,6 +156,9 @@ public class NFA implements Cloneable
         rdst.setElementAt( rsrc.get( j ), j );
       }
     }
+
+    for ( Input in : src.inputs )
+      this.inputs.add( in );
   }
 
   public void dumpInternalTranstbl()

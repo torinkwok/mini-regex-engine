@@ -5,20 +5,21 @@ public class NFA implements Cloneable
   public int start;
   public int end;
 
-  public final Vector<Object> transtbl;
+  private final Vector<Vector<Input>> transtbl;
 
-  public final Set<Input> inputs = new HashSet<>();
+  private final Set<Input> inputs = new HashSet<>();
 
   @Override
   public NFA clone() { return new NFA( this ); }
 
   public NFA( NFA src )
   {
-    Vector<Object> cloned_transtbl = new Vector<Object>( src.count() );
+    Vector<Vector<Input>> cloned_transtbl = new Vector<>( src.count() );
     for ( int i = 0; i < src.count(); i++ )
     {
-      Vector<Input> src_r = ( Vector<Input> )src.transtbl.get( i );
-      Vector<Input> cloned_r = new Vector<Input>( src.count() );
+      Vector<Input> src_r = src.transtbl.get( i );
+      Vector<Input> cloned_r = new Vector<>( src.count() );
+
       for ( int j = 0; j < src.count(); j++ )
       {
         cloned_r.add( src_r.get( j ) );
@@ -36,17 +37,16 @@ public class NFA implements Cloneable
     assert( isLegalState( start ) );
     assert( isLegalState( end ) );
 
-    transtbl = new Vector<Object>( size );
-
-    this.start = start;
-    this.end   = end;
+    this transtbl = new Vector<>( size );
+    this.start    = start;
+    this.end      = end;
 
     // Initialize transtbl with an "empty graph",
     // no transitions between its states
 
     for ( int i = 0; i < size; i++ )
     {
-      Vector<Input> row = new Vector<Input>( size );
+      Vector<Input> row = new Vector<>( size );
       for ( int j = 0; j < size; j++ ) { row.add( Input.NONE ); }
 
       transtbl.add( row );
@@ -61,7 +61,7 @@ public class NFA implements Cloneable
     assert( isLegalState( from ) );
     assert( isLegalState( to ) );
 
-    Vector<Input> row = ( Vector<Input> )transtbl.get( from );
+    Vector<Input> row = transtbl.get( from );
     row.setElementAt( in, to );
 
     if ( in != Input.EPS )
@@ -78,7 +78,7 @@ public class NFA implements Cloneable
     {
       for ( int to = 0; to < count(); to++ )
       {
-        Vector<Input> row = ( Vector<Input> )transtbl.get( from );
+        Vector<Input> row = transtbl.get( from );
         Input in = row.get( to );
 
         if ( in != Input.NONE )
@@ -96,14 +96,14 @@ public class NFA implements Cloneable
    */
   public void appendEmptyState()
   {
-    Vector<Input> newrow = new Vector<Input>( count() + 1 );
+    Vector<Input> newrow = new Vector<>( count() + 1 );
     for ( int i = 0; i < count(); i++ ) { newrow.add( Input.NONE ); }
 
     transtbl.add( newrow );
 
     for ( int i = 0; i < count(); i++ )
     {
-      Vector<Input> ri = ( Vector<Input> )transtbl.get( i );
+      Vector<Input> ri = transtbl.get( i );
       ri.add( Input.NONE );
     }
 
@@ -122,7 +122,7 @@ public class NFA implements Cloneable
 
     for ( int i = 0; i < shift; i++ )
     {
-      Vector<Input> newrow = new Vector<Input>( count() + shift );
+      Vector<Input> newrow = new Vector<>( count() + shift );
       for ( int j = 0; j < count(); j++ ) { newrow.add( Input.NONE ); }
 
       transtbl.insertElementAt( newrow, 0 );
@@ -130,7 +130,7 @@ public class NFA implements Cloneable
 
     for ( int i = 0; i < count(); i++ )
     {
-      Vector<Input> ri = ( Vector<Input> )transtbl.get( i );
+      Vector<Input> ri = transtbl.get( i );
       for ( int j = 0; j < shift; j++ ) { ri.insertElementAt( Input.NONE, 0 ); }
     }
 
@@ -150,8 +150,8 @@ public class NFA implements Cloneable
     {
       for ( int j = 0; j < srcsz; j++ )
       {
-        Vector<Input> rsrc = ( Vector<Input> )src.transtbl.get( i );
-        Vector<Input> rdst = ( Vector<Input> )dst.transtbl.get( i );
+        Vector<Input> rsrc = src.transtbl.get( i );
+        Vector<Input> rdst = dst.transtbl.get( i );
 
         rdst.setElementAt( rsrc.get( j ), j );
       }
@@ -175,7 +175,7 @@ public class NFA implements Cloneable
 
     for ( int i = 0; i < count(); i++ )
     {
-      Vector<Input> r = ( Vector<Input> )transtbl.get( i );
+      Vector<Input> r = transtbl.get( i );
       System.out.print( i % 10 + " " );
 
       for ( int j = 0; j < count(); j++ )
@@ -330,7 +330,7 @@ public class NFA implements Cloneable
       {
         t = stack.pop();
 
-        Vector<Input> r = ( Vector<Input> ) transtbl.get( t );
+        Vector<Input> r = transtbl.get( t );
         Set<Integer> U = new HashSet<>();
 
         U.add( t );
@@ -372,7 +372,7 @@ public class NFA implements Cloneable
 
     for ( int t : T )
     {
-      Vector<Input> r = ( Vector<Input> )transtbl.get( t );
+      Vector<Input> r = transtbl.get( t );
       for ( int c = 0; c < count(); c++ )
       {
         Input in = r.get( c );

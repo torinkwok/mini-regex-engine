@@ -42,7 +42,12 @@ public class DFA implements Cloneable
   private boolean _simulate( State currentState, String in )
   {
     if ( in.length() == 0 )
-      return this.ends.contains( currentState );
+    {
+      Set<State> states = State.stateStates( currentState.subsetized().nfaStatesSet() );
+      states.retainAll( this.ends );
+
+      return states.size() > 0;
+    }
 
     Input c = new Input( in.charAt( 0 ) );
 

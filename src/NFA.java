@@ -555,6 +555,8 @@ public class NFA implements Cloneable
     // System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
 
     DFA dfa = regex_s_OR_t_STAR_stt.subsetConstruction();
-    System.out.println( dfa.simulate( "sstt" ) );
+    dfa.ends.add( new State( 10 ) );
+    dfa.show();
+    System.out.println( dfa.simulate( "sststststtstt" ) );
   }
 }

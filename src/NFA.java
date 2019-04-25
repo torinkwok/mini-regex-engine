@@ -125,7 +125,8 @@ public class NFA implements Cloneable
     return result;
   }
 
-  private Map<Map<State, Input>, State> _rSubsetConstruction( State cur_state )
+  private Map<Map<State, Input>, State>
+  _rSubsetConstruction( State cur_state, Map<Map<State, Input>, State> partial_dfa_rep )
   {
     Map<Map<State, Input>, State> dfa_rep = new HashMap<>();
     Set<State> result_states = new HashSet<>();
@@ -144,9 +145,11 @@ public class NFA implements Cloneable
       State ns = new State( State.integerStates( next_states ) );
       HashMap from_key = new HashMap(){{ put( cur_state, in ); }};
 
-      if ( _partial_dfa_rep == null || !_partial_dfa_rep.containsKey( from_key ) )
+      if ( partial_dfa_rep == null ) partial_dfa_rep = new HashMap();
+
+      if ( !partial_dfa_rep.containsKey( from_key ) )
       {
-        _partial_dfa_rep.put( from_key, ns );
+        partial_dfa_rep.put( from_key, ns );
 
         dfa_rep.put( from_key, ns );
         result_states.add( ns );
@@ -154,29 +157,30 @@ public class NFA implements Cloneable
     }
 
     for ( State s : result_states )
-      dfa_rep.putAll( _rSubsetConstruction( s ) );
+    {
+      HashMap new_partial_dfa_rep = new HashMap();
+
+      new_partial_dfa_rep.putAll( dfa_rep );
+      new_partial_dfa_rep.putAll( partial_dfa_rep );
+
+      dfa_rep.putAll( _rSubsetConstruction( s, new_partial_dfa_rep ) );
+    }
 
     return dfa_rep;
   }
 
-  private Map<Map<State, Input>, State> _partial_dfa_rep;
   public DFA subsetConstruction()
   {
-    DFA dfa = new DFA();
-
-
     State dfa_start_state = new State(
       State.integerStates( _epsClosure( new HashSet(){{ add( start ); }} ) ) );
 
+    DFA dfa = new DFA();
     dfa.start = dfa_start_state;
 
-    _partial_dfa_rep = new HashMap();
+    System.out.println( _rSubsetConstruction( dfa.start, null ) );
 
-    System.out.println( _rSubsetConstruction( dfa.start ) );
+    Map<Map<State, Input>, State> dfa_rep = _rSubsetConstruction( dfa.start, null );
 
-    _partial_dfa_rep = new HashMap();
-
-    Map<Map<State, Input>, State> dfa_rep = _rSubsetConstruction( dfa.start );
     for ( Map.Entry<Map<State, Input>, State> entry : dfa_rep.entrySet() )
     {
       for ( Map.Entry<State, Input> keyentry : entry.getKey().entrySet() )

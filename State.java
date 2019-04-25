@@ -70,6 +70,20 @@ public class State implements Cloneable
     isSubsetState = true;
   }
 
+  public static Set<Integer> integerStates( Set<State> statesSet )
+  {
+    Set<Integer> sn_set = new HashSet<>();
+    for ( State state : statesSet )
+    {
+      if ( state.isSubsetState )
+        sn_set.addAll( state.nfaStatesSet() );
+      else
+        sn_set.add( state.n() );
+    }
+
+    return sn_set;
+  }
+
   public boolean equals( Object o )
   {
     if ( this == o ) return true;

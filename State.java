@@ -45,7 +45,7 @@ public class State implements Cloneable
 
   public final boolean isSubsetState;
 
-  public Integer      n()  { return _Sn.value(); }
+  public Integer      n()            { return _Sn.value();           }
   public Set<Integer> nfaStatesSet() { return _nfaStatesSet.value(); }
 
   public static State ZERO = new State( 0 );
@@ -97,6 +97,14 @@ public class State implements Cloneable
     isSubsetState = false;
   }
 
+  public State subsetized()
+  {
+    if ( isSubsetState )
+      return clone();
+    else
+      return new State( new HashSet( Arrays.asList( _Sn.value() ) ) );
+  }
+
   public static void main( String args[] )
   {
     State state_0 = new State( 4 );
@@ -129,5 +137,14 @@ public class State implements Cloneable
 
     assert state_zero_0 == state_zero_1;
     assert state_zero_0.n() == state_zero_1.n();
+
+    State subsetized_state_0 = state_0.subsetized();
+    assert !state_0.isSubsetState;
+    assert subsetized_state_0.isSubsetState;
+    assert !subsetized_state_0.equals( state_0 );
+
+    State subsetized_state_1 = state_3.subsetized();
+    assert subsetized_state_1 != state_3.subsetized();
+    assert subsetized_state_1.equals( state_3 );
   }
 }

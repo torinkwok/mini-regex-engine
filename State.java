@@ -45,7 +45,7 @@ public class State implements Cloneable
 
   public final boolean isSubsetState;
 
-  public Integer      stateNumber()  { return _Sn.value(); }
+  public Integer      n()  { return _Sn.value(); }
   public Set<Integer> nfaStatesSet() { return _nfaStatesSet.value(); }
 
   public State( Set<Integer> statesSet )
@@ -104,8 +104,8 @@ public class State implements Cloneable
     State state_3 = state_2.clone();
     State state_4 = new State( new HashSet<>( Arrays.asList( 2, 6, 7 ) ) );
 
-    System.out.println( state_0.stateNumber() );
-    System.out.println( state_2.stateNumber() );
+    System.out.println( state_0.n() );
+    System.out.println( state_2.n() );
     System.out.println( state_2.nfaStatesSet() );
     System.out.println( state_4.nfaStatesSet() );
 

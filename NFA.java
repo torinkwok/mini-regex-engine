@@ -2,8 +2,8 @@ import java.util.*;
 
 public class NFA implements Cloneable
 {
-  public int start;
-  public int end;
+  public State start;
+  public State end;
 
   private final Vector<Vector<Input>> transtbl;
 
@@ -21,9 +21,8 @@ public class NFA implements Cloneable
       Vector<Input> cloned_r = new Vector<>( src.count() );
 
       for ( int j = 0; j < src.count(); j++ )
-      {
         cloned_r.add( src_r.get( j ) );
-      }
+
       cloned_transtbl.add( cloned_r );
     }
 
@@ -34,12 +33,12 @@ public class NFA implements Cloneable
 
   public NFA( int size, int start, int end )
   {
-    assert( isLegalState( start ) );
-    assert( isLegalState( end ) );
+    assert( _isLegalState( start ) );
+    assert( _isLegalState( end ) );
 
     this.transtbl = new Vector<>( size );
-    this.start    = start;
-    this.end      = end;
+    this.start    = new State( start );
+    this.end      = new State( end );
 
     // Initialize transtbl with an "empty graph",
     // no transitions between its states
@@ -47,14 +46,15 @@ public class NFA implements Cloneable
     for ( int i = 0; i < size; i++ )
     {
       Vector<Input> row = new Vector<>( size );
-      for ( int j = 0; j < size; j++ ) { row.add( Input.NONE ); }
+      for ( int j = 0; j < size; j++ ) row.add( Input.NONE );
 
       transtbl.add( row );
     }
   }
 
   public int     count()               { return transtbl.size();      }
-  public boolean isLegalState( int s ) { return s >= 0 || s < count(); }
+
+  private boolean _isLegalState( int s ) { return s >= 0 || s < count(); }
 
   // private DFA _subsetConstruction( 
 
@@ -63,10 +63,13 @@ public class NFA implements Cloneable
     
   // }
 
-  public void addTransition( int from, int to, Input in )
+  public void addTransition( State from, State to, Input in ) { addTransition( from.n(), to.n(), in ); }
+  public void addTransition( State from, int to,   Input in ) { addTransition( from.n(), to,     in ); }
+  public void addTransition( int from,   State to, Input in ) { addTransition( from,     to.n(), in ); }
+  public void addTransition( int from,   int to,   Input in )
   {
-    assert( isLegalState( from ) );
-    assert( isLegalState( to ) );
+    assert( _isLegalState( from ) );
+    assert( _isLegalState( to ) );
 
     Vector<Input> row = transtbl.get( from );
     row.setElementAt( in, to );
@@ -78,8 +81,8 @@ public class NFA implements Cloneable
   public void show()
   {
     System.out.println( String.format( "This NFA got %d states: s0 - s%d", count(), count() - 1 ) );
-    System.out.println( String.format( "The initial state is s%d", start ) );
-    System.out.println( String.format( "The final state is s%d", end ) );
+    System.out.println( String.format( "The initial state is s%d", start.n() ) );
+    System.out.println( String.format( "The final state is s%d", end.n() ) );
 
     for ( int from = 0; from < count(); from++ )
     {
@@ -114,7 +117,10 @@ public class NFA implements Cloneable
       ri.add( Input.NONE );
     }
 
-    this.end++;
+    this.end = new State( this.end.n() + 1 );
+
+    // TODO: Implement State's self-increase logic
+    // this.end++;
   }
 
   /** Renames all the NFA's states:
@@ -141,8 +147,12 @@ public class NFA implements Cloneable
       for ( int j = 0; j < shift; j++ ) { ri.insertElementAt( Input.NONE, 0 ); }
     }
 
-    this.start += shift;
-    this.end   += shift;
+    this.start = new State( this.start.n() + shift );
+    this.end   = new State( this.end.n() + shift );
+
+    // TODO: Implement State's self-increase logic
+    // this.start += shift;
+    // this.end   += shift;
   }
 
   /** Fills states 0 up to src.count() with src's states.
@@ -171,8 +181,8 @@ public class NFA implements Cloneable
   public void dumpInternalTranstbl()
   {
     System.out.println( "====================" );
-    System.out.println( "Initial State: " + start );
-    System.out.println( "  Final State: " + end );
+    System.out.println( "Initial State: " + start.n() );
+    System.out.println( "  Final State: " + end.n() );
     System.out.println( "--------------------" );
     System.out.println();
 
@@ -234,10 +244,10 @@ public class NFA implements Cloneable
 
     nfaUnion.addTransition( 0, nfa1.start, Input.EPS );
     nfaUnion.addTransition( 0, nfa2.start, Input.EPS );
-    nfaUnion.start = 0;
+    nfaUnion.start = State.ZERO;
 
     nfaUnion.appendEmptyState();
-    nfaUnion.end = nfaUnion.count() - 1;
+    nfaUnion.end = new State( nfaUnion.count() - 1 );
 
     nfaUnion.addTransition( nfa1.end, nfaUnion.end, Input.EPS );
     nfaUnion.addTransition( nfa2.end, nfaUnion.end, Input.EPS );
@@ -283,8 +293,11 @@ public class NFA implements Cloneable
     nfaKleeneStar.fillStates( nfa );
     nfaKleeneStar.appendEmptyState();
 
-    nfaKleeneStar.start = 0;
-    nfaKleeneStar.end = nfaKleeneStar.count() - 1;
+    nfaKleeneStar.start = State.ZERO;
+    nfaKleeneStar.end = new State( nfaKleeneStar.count() - 1 );
+
+    // nfaKleeneStar.start = 0;
+    // nfaKleeneStar.end = nfaKleeneStar.count() - 1;
 
     nfaKleeneStar.addTransition( 0, nfa.start, Input.EPS );
     nfaKleeneStar.addTransition( 0, nfaKleeneStar.end, Input.EPS );

@@ -142,9 +142,11 @@ public class State implements Cloneable
     assert !state_0.isSubsetState;
     assert subsetized_state_0.isSubsetState;
     assert !subsetized_state_0.equals( state_0 );
+    assert subsetized_state_0.hashCode() != state_0.hashCode();
 
     State subsetized_state_1 = state_3.subsetized();
     assert subsetized_state_1 != state_3.subsetized();
     assert subsetized_state_1.equals( state_3 );
+    assert subsetized_state_1.hashCode() == state_3.hashCode();
   }
 }

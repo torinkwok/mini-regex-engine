@@ -45,7 +45,7 @@ public class NFA implements Cloneable
 
   private final Vector<Vector<Input>> transtbl;
 
-  private final Set<Input> inputs = new HashSet<>();
+  private Set<Input> inputs = new HashSet<>();
 
   @Override
   public NFA clone() { return new NFA( this ); }
@@ -67,6 +67,7 @@ public class NFA implements Cloneable
     this.transtbl = cloned_transtbl;
     this.start    = src.start;
     this.end      = src.end;
+    this.inputs   = src.inputs;
   }
 
   public NFA( int size, int start, int end )
@@ -512,6 +513,7 @@ public class NFA implements Cloneable
     System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
     System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
 
-    regex_s_OR_t_STAR_stt.subsetConstruction();
+    DFA dfa = regex_s_OR_t_STAR_stt.subsetConstruction();
+    System.out.println( dfa.simulate( "ststt" ) );
   }
 }

@@ -84,6 +84,15 @@ public class State implements Cloneable
     return sn_set;
   }
 
+  public static Set<State> stateStates( Set<Integer> integersSet )
+  {
+    Set<State> states_set = new HashSet<>();
+    for ( int sn : integersSet )
+      states_set.add( new State( sn ) );
+
+    return states_set;
+  }
+
   public boolean equals( Object o )
   {
     if ( this == o ) return true;

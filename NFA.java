@@ -56,11 +56,9 @@ public class NFA implements Cloneable
 
   private boolean _isLegalState( int s ) { return s >= 0 || s < count(); }
 
-  // private DFA _subsetConstruction( 
-
   // public DFA subsetConstruction()
   // {
-    
+    // State dfa_start_state = _eps
   // }
 
   public void addTransition( State from, State to, Input in ) { addTransition( from.n(), to.n(), in ); }
@@ -81,8 +79,8 @@ public class NFA implements Cloneable
   public void show()
   {
     System.out.println( String.format( "This NFA got %d states: s0 - s%d", count(), count() - 1 ) );
-    System.out.println( String.format( "The initial state is s%d", start.n() ) );
-    System.out.println( String.format( "The final state is s%d", end.n() ) );
+    System.out.println( String.format( "The initial state is " + start ) );
+    System.out.println( String.format( "The final state is " + end ) );
 
     for ( int from = 0; from < count(); from++ )
     {
@@ -174,8 +172,8 @@ public class NFA implements Cloneable
   public void dumpInternalTranstbl()
   {
     System.out.println( "====================" );
-    System.out.println( "Initial State: " + start.n() );
-    System.out.println( "  Final State: " + end.n() );
+    System.out.println( "Initial State: " + start );
+    System.out.println( "  Final State: " + end );
     System.out.println( "--------------------" );
     System.out.println();
 
@@ -312,7 +310,7 @@ public class NFA implements Cloneable
    *  inputs: T - set of NFA states
    *  output: eps-closure(T) - states reachable from T by eps transitions
    */
-  public Set<Integer> _epsClosure( Set<Integer> T )
+  public Set<State> _epsClosure( Set<State> T )
   {
     // This algorithm iteratively finds all the states reachable
     // by *eps* transitions from the states T. First, the states
@@ -327,35 +325,35 @@ public class NFA implements Cloneable
     // (s|t)*stt NFA above, eps-closure({0}) = {0, 1, 2, 4, 7},
     // eps-closure({8, 9}) = {8, 9}, etc..
 
-    Set<Integer> closure = new HashSet<>();
+    Set<State> closure = new HashSet<>();
     if ( T.isEmpty() ) return closure;
 
-    AdHocStack<Integer> stack = new AdHocStack<>();
+    AdHocStack<State> stack = new AdHocStack<>();
 
-    for ( int t : T )
+    for ( State st : T )
     {
-      stack.push( t );
+      stack.push( st );
 
       while ( !stack.isEmpty() )
       {
-        t = stack.pop();
+        st = stack.pop();
 
-        Vector<Input> r = transtbl.get( t );
-        Set<Integer> U = new HashSet<>();
+        Vector<Input> r = transtbl.get( st.n() );
+        Set<State> U = new HashSet<>();
 
-        U.add( t );
+        U.add( st );
 
         for ( int c = 0; c < count(); c++ )
           if ( r.get( c ) == Input.EPS )
-            U.add( c );
+            U.add( new State( c ) );
 
-        for ( int u : U )
+        for ( State su : U )
         {
-          if ( !closure.contains( u ) )
-            {
-              closure.add( u );
-              stack.push( u );
-            }
+          if ( !closure.contains( su ) )
+          {
+            closure.add( su );
+            stack.push( su );
+          }
         }
       }
     }
@@ -367,7 +365,7 @@ public class NFA implements Cloneable
    *  like to know which states in the NFA are reachable from T
    *  with the input A.
    */
-  public Set<Integer> _nextStates( Set<Integer> T, Input A )
+  public Set<State> _nextStates( Set<State> T, Input A )
   {
     // The function traverses the set T, and looks for
     // transitions on the given input, returning the states that
@@ -375,19 +373,19 @@ public class NFA implements Cloneable
     // transitions from those states - there's eps-closure
     // algorithm for that.
 
-    Set<Integer> states = new HashSet<>();
+    Set<State> states = new HashSet<>();
 
     if ( A == Input.EPS || A == Input.NONE )
       return states;
 
-    for ( int t : T )
+    for ( State st : T )
     {
-      Vector<Input> r = transtbl.get( t );
+      Vector<Input> r = transtbl.get( st.n() );
       for ( int c = 0; c < count(); c++ )
       {
         Input in = r.get( c );
         if ( in == Input.EPS || in == Input.NONE ) continue;
-        if ( in.equals( A ) )                      states.add( c );
+        if ( in.equals( A ) )                      states.add( new State( c ) );
       }
     }
 
@@ -467,8 +465,8 @@ public class NFA implements Cloneable
     NFA regex_s_OR_t_STAR_stt = NFA.buildNFAConcatenation( regex_s_OR_t_STAR, regex_stt );
     regex_s_OR_t_STAR_stt.dumpInternalTranstbl();
 
-    Set<Integer> s = new HashSet<>();
-    s.add( 6 );
+    Set<State> s = new HashSet<>();
+    s.add( new State( 6 ) );
     System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
     System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
   }

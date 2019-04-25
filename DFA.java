@@ -38,6 +38,7 @@ public class DFA implements Cloneable
     this.transtbl.put( new HashMap(){{ put( from, in ); }}, to );
   }
 
+  public  boolean simulate( String to_recog ) { return _simulate( this.start, to_recog ); }
   private boolean _simulate( State currentState, String in )
   {
     if ( in.length() == 0 )
@@ -52,11 +53,6 @@ public class DFA implements Cloneable
       return _simulate( to_state, in.substring( 1 ) );
 
     return false;
-  }
-
-  public boolean simulate( String to_recog )
-  {
-    return _simulate( this.start, to_recog );
   }
 
   public void show()

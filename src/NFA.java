@@ -94,12 +94,53 @@ public class NFA implements Cloneable
   public int count() { return transtbl.size(); }
   private boolean _isLegalState( int s ) { return s >= 0 || s < count(); }
 
+  private Map<Map<State, Input>, State> _subsetConstruction( DFA dfa, State state )
+  {
+    Map<Map<State, Input>, State> result = null;
+
+    for ( Input in : this.inputs )
+    {
+      Set<State> next_states = new HashSet();
+      for ( int sn : state.nfaStatesSet() )
+      {
+        State s = new State( sn );
+
+        Set<State> states = new HashSet(){{ add( s ); }};
+        next_states.addAll( _nextStates( states, in ) );
+        next_states.addAll( _epsClosure( next_states ) );
+      }
+
+      State ns = new State( State.integerStates( next_states ) );
+      Map<State, Input> k = new HashMap(){{ put( state, in ); }};
+
+      if ( !dfa.transtbl.containsKey( k ) )
+      {
+        dfa.addTransition( state, ns, in );
+
+        if ( result == null ) result = new HashMap<>();
+        result.put( k, ns );
+      }
+    }
+
+    return result;
+  }
+
   public DFA subsetConstruction()
   {
     DFA dfa = new DFA();
 
-    Set<State> dfa_start_state = _epsClosure( new HashSet(){{ add( start ); }} );
-    System.out.println( dfa_start_state );
+    State dfa_start_state = new State(
+      State.integerStates( _epsClosure( new HashSet(){{ add( start ); }} ) ) );
+
+    dfa.start = dfa_start_state;
+
+    Map<Map<State, Input>, State> result = _subsetConstruction( dfa, dfa.start );
+
+    while ( result != null )
+    {
+      for ( State s : result.values() )
+        result = _subsetConstruction( dfa, s );
+    }
 
     return dfa;
   }
@@ -474,31 +515,31 @@ public class NFA implements Cloneable
     anotherNFA.dumpInternalTranstbl();
     nfa.fillStates( anotherNFA ); nfa.dumpInternalTranstbl();
 
-    NFA regex_r = NFA.buildNFABasic( new Input( 'r' ) );
+    // NFA regex_r = NFA.buildNFABasic( new Input( 'r' ) );
     NFA regex_s = NFA.buildNFABasic( new Input( 's' ) );
     NFA regex_t = NFA.buildNFABasic( new Input( 't' ) );
 
     /// RegEx #0: s|t
 
     NFA regex_s_OR_t = NFA.buildNFAAlternation( regex_s, regex_t );
-    regex_s_OR_t.dumpInternalTranstbl();
+    // regex_s_OR_t.dumpInternalTranstbl();
 
-    // RegEx #1: st
+    // // RegEx #1: st
 
-    NFA regex_rs = NFA.buildNFAConcatenation( regex_r, regex_s );
-    NFA regex_rst = NFA.buildNFAConcatenation( regex_rs, regex_t );
-    regex_rst.dumpInternalTranstbl();
+    // NFA regex_rs = NFA.buildNFAConcatenation( regex_r, regex_s );
+    // NFA regex_rst = NFA.buildNFAConcatenation( regex_rs, regex_t );
+    // regex_rst.dumpInternalTranstbl();
 
-    // RegEx #2: s*
+    // // RegEx #2: s*
 
-    NFA regex_s_STAR = NFA.buildNFAKleeneStar( regex_s );
-    regex_s_STAR.dumpInternalTranstbl();
+    // NFA regex_s_STAR = NFA.buildNFAKleeneStar( regex_s );
+    // regex_s_STAR.dumpInternalTranstbl();
 
-    // RegEx #3: s*|ts
+    // // RegEx #3: s*|ts
 
-    NFA tsNFA = NFA.buildNFAConcatenation( regex_t, regex_s );
-    NFA regex_s_STAR_or_ts = NFA.buildNFAAlternation( regex_s_STAR, tsNFA );
-    regex_s_STAR_or_ts.dumpInternalTranstbl();
+    // NFA tsNFA = NFA.buildNFAConcatenation( regex_t, regex_s );
+    // NFA regex_s_STAR_or_ts = NFA.buildNFAAlternation( regex_s_STAR, tsNFA );
+    // regex_s_STAR_or_ts.dumpInternalTranstbl();
 
     // RegEx #4: (s|t)*stt
 
@@ -510,10 +551,10 @@ public class NFA implements Cloneable
 
     Set<State> s = new HashSet<>();
     s.add( new State( 6 ) );
-    System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
-    System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
+    // System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
+    // System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
 
     DFA dfa = regex_s_OR_t_STAR_stt.subsetConstruction();
-    System.out.println( dfa.simulate( "ststt" ) );
+    System.out.println( dfa.simulate( "sstt" ) );
   }
 }

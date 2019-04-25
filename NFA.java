@@ -2,6 +2,44 @@ import java.util.*;
 
 public class NFA implements Cloneable
 {
+  private class AdHocStack<T>
+  {
+    private T[] _a = (T[]) new Object[1];
+    private int _N = 0;
+
+    public boolean isEmpty()  { return _N == 0;   }
+    public int     size()     { return _N;        }
+    public int     capacity() { return _a.length; }
+
+    private void _resize( int new_sz )
+    {
+      if ( _N > new_sz )
+        throw new RuntimeException( "Illegal new size of stack's internal strorage" );
+
+      T[] buffer = (T[]) new Object[ new_sz ];
+      for ( int i = 0; i < _N; i++ )
+        buffer[i] = _a[i];
+
+      _a = buffer;
+    }
+
+    public void push( T ele )
+    {
+      if ( size() == capacity() ) _resize( capacity() * 2 );
+      _a[_N++] = ele;
+    }
+
+    public T pop()
+    {
+      T popped = _a[--_N];
+
+      if ( size() > 0 && size() == capacity() / 4 )
+        _resize( capacity() / 2 );
+
+      return popped;
+    }
+  }
+
   public State start;
   public State end;
 
@@ -52,19 +90,23 @@ public class NFA implements Cloneable
     }
   }
 
-  public int     count()               { return transtbl.size();      }
-
+  public int count() { return transtbl.size(); }
   private boolean _isLegalState( int s ) { return s >= 0 || s < count(); }
 
-  // public DFA subsetConstruction()
-  // {
-    // State dfa_start_state = _eps
-  // }
+  public DFA subsetConstruction()
+  {
+    DFA dfa = new DFA();
+
+    Set<State> dfa_start_state = _epsClosure( new HashSet(){{ add( start ); }} );
+    System.out.println( dfa_start_state );
+
+    return dfa;
+  }
 
   public void addTransition( State from, State to, Input in ) { addTransition( from.n(), to.n(), in ); }
-  public void addTransition( State from, int to,   Input in ) { addTransition( from.n(), to,     in ); }
-  public void addTransition( int from,   State to, Input in ) { addTransition( from,     to.n(), in ); }
-  public void addTransition( int from,   int to,   Input in )
+  public void addTransition( State from, int   to, Input in ) { addTransition( from.n(), to,     in ); }
+  public void addTransition( int   from, State to, Input in ) { addTransition( from,     to.n(), in ); }
+  public void addTransition( int   from, int   to, Input in )
   {
     assert( _isLegalState( from ) );
     assert( _isLegalState( to ) );
@@ -469,5 +511,7 @@ public class NFA implements Cloneable
     s.add( new State( 6 ) );
     System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
     System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
+
+    regex_s_OR_t_STAR_stt.subsetConstruction();
   }
 }

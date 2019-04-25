@@ -48,6 +48,8 @@ public class State implements Cloneable
   public Integer      n()  { return _Sn.value(); }
   public Set<Integer> nfaStatesSet() { return _nfaStatesSet.value(); }
 
+  public static State ZERO = new State( 0 );
+
   public State( Set<Integer> statesSet )
   {
     _Sn = new AdHocNullable();
@@ -119,5 +121,13 @@ public class State implements Cloneable
 
     assert state_2.equals( state_3 );
     assert !state_2.equals( state_4 );
+
+    ///
+
+    State state_zero_0 = State.ZERO;
+    State state_zero_1 = State.ZERO;
+
+    assert state_zero_0 == state_zero_1;
+    assert state_zero_0.n() == state_zero_1.n();
   }
 }

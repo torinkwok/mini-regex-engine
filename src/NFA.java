@@ -125,21 +125,62 @@ public class NFA implements Cloneable
     return result;
   }
 
+  private Map<Map<State, Input>, State> _rSubsetConstruction( State cur_state )
+  {
+    Map<Map<State, Input>, State> dfa_rep = new HashMap<>();
+    Set<State> result_states = new HashSet<>();
+
+    for ( Input in : this.inputs )
+    {
+      HashSet next_states = new HashSet();
+
+      for ( State cs : State.stateStates( cur_state.nfaStatesSet() ) )
+      {
+        HashSet states = new HashSet(){{ add( cs ); }};
+        next_states.addAll( _nextStates( states, in ) );
+        next_states.addAll( _epsClosure( next_states ) );
+      }
+
+      State ns = new State( State.integerStates( next_states ) );
+      HashMap from_key = new HashMap(){{ put( cur_state, in ); }};
+
+      if ( _partial_dfa_rep == null || !_partial_dfa_rep.containsKey( from_key ) )
+      {
+        _partial_dfa_rep.put( from_key, ns );
+
+        dfa_rep.put( from_key, ns );
+        result_states.add( ns );
+      }
+    }
+
+    for ( State s : result_states )
+      dfa_rep.putAll( _rSubsetConstruction( s ) );
+
+    return dfa_rep;
+  }
+
+  private Map<Map<State, Input>, State> _partial_dfa_rep;
   public DFA subsetConstruction()
   {
     DFA dfa = new DFA();
+
 
     State dfa_start_state = new State(
       State.integerStates( _epsClosure( new HashSet(){{ add( start ); }} ) ) );
 
     dfa.start = dfa_start_state;
 
-    Map<Map<State, Input>, State> result = _subsetConstruction( dfa, dfa.start );
+    _partial_dfa_rep = new HashMap();
 
-    while ( result != null )
+    System.out.println( _rSubsetConstruction( dfa.start ) );
+
+    _partial_dfa_rep = new HashMap();
+
+    Map<Map<State, Input>, State> dfa_rep = _rSubsetConstruction( dfa.start );
+    for ( Map.Entry<Map<State, Input>, State> entry : dfa_rep.entrySet() )
     {
-      for ( State s : result.values() )
-        result = _subsetConstruction( dfa, s );
+      for ( Map.Entry<State, Input> keyentry : entry.getKey().entrySet() )
+        dfa.addTransition( keyentry.getKey(), entry.getValue(), keyentry.getValue() );
     }
 
     return dfa;

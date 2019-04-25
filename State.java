@@ -50,6 +50,16 @@ public class State implements Cloneable
 
   public static State ZERO = new State( 0 );
 
+  @Override
+  public String toString()
+  {
+    if ( isSubsetState ) {
+      return "" + nfaStatesSet();
+    } else {
+      return "s" + n();
+    }
+  }
+
   public State( Set<Integer> statesSet )
   {
     _Sn = new AdHocNullable();
@@ -148,5 +158,10 @@ public class State implements Cloneable
     assert subsetized_state_1 != state_3.subsetized();
     assert subsetized_state_1.equals( state_3 );
     assert subsetized_state_1.hashCode() == state_3.hashCode();
+
+    System.out.println( state_0 );
+    System.out.println( state_1 );
+    System.out.println( state_2 );
+    System.out.println( state_3 );
   }
 }

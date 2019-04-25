@@ -118,9 +118,6 @@ public class NFA implements Cloneable
     }
 
     this.end = new State( this.end.n() + 1 );
-
-    // TODO: Implement State's self-increase logic
-    // this.end++;
   }
 
   /** Renames all the NFA's states:
@@ -149,10 +146,6 @@ public class NFA implements Cloneable
 
     this.start = new State( this.start.n() + shift );
     this.end   = new State( this.end.n() + shift );
-
-    // TODO: Implement State's self-increase logic
-    // this.start += shift;
-    // this.end   += shift;
   }
 
   /** Fills states 0 up to src.count() with src's states.
@@ -295,9 +288,6 @@ public class NFA implements Cloneable
 
     nfaKleeneStar.start = State.ZERO;
     nfaKleeneStar.end = new State( nfaKleeneStar.count() - 1 );
-
-    // nfaKleeneStar.start = 0;
-    // nfaKleeneStar.end = nfaKleeneStar.count() - 1;
 
     nfaKleeneStar.addTransition( 0, nfa.start, Input.EPS );
     nfaKleeneStar.addTransition( 0, nfaKleeneStar.end, Input.EPS );

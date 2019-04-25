@@ -2,7 +2,7 @@ import java.util.*;
 
 public class State implements Cloneable
 {
-  private class AdHocNullable<T>
+  private class AdHocNullable<T> implements Cloneable
   {
     private T _value;
 
@@ -14,6 +14,14 @@ public class State implements Cloneable
 
     public T value()                          { return _value; }
     public T valueOrDefault( T defaultValue ) { return _value == null ? defaultValue : _value; }
+
+    @Override
+    public AdHocNullable<T> clone()
+    {
+      AdHocNullable<T> cloned;
+      cloned = hasValue() ? new AdHocNullable() : new AdHocNullable( value() );
+      return cloned;
+    }
 
     @Override
     public int hashCode() { return Objects.hashCode( _value ); }
@@ -37,6 +45,16 @@ public class State implements Cloneable
 
   public final boolean isSubsetState;
 
+  public State( Set<Integer> statesSet )
+  {
+    _Sn = new AdHocNullable();
+
+    _nfaStatesSet = new AdHocNullable( statesSet );
+    _nfaStatesSet.set( statesSet );
+
+    isSubsetState = true;
+  }
+
   public boolean equals( Object o )
   {
     if ( this == o ) return true;
@@ -55,6 +73,14 @@ public class State implements Cloneable
   }
 
   @Override
+  public State clone()
+  {
+    State cloned;
+    cloned = isSubsetState ? new State( _nfaStatesSet.value() ) : new State( _Sn.value() );
+    return cloned;
+  }
+
+  @Override
   public int hashCode() { return Objects.hash( _Sn, _nfaStatesSet ); }
 
   public State( int sn )
@@ -66,22 +92,13 @@ public class State implements Cloneable
     isSubsetState = false;
   }
 
-  public State( Set<Integer> statesSet )
-  {
-    _Sn = new AdHocNullable();
-
-    _nfaStatesSet = new AdHocNullable( statesSet );
-    _nfaStatesSet.set( statesSet );
-    isSubsetState = true;
-  }
-
   public static void main( String args[] )
   {
     State state_0 = new State( 14 );
     State state_1 = new State( 14 );
 
     State state_2 = new State( new HashSet<>( Arrays.asList( 2, 6, 6 ) ) );
-    State state_3 = new State( new HashSet<>( Arrays.asList( 2, 6, 6 ) ) );
+    State state_3 = state_2.clone();
     State state_4 = new State( new HashSet<>( Arrays.asList( 2, 6, 7 ) ) );
 
     assert state_0.hashCode() == state_1.hashCode();

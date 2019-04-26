@@ -10,7 +10,7 @@ public class DFA implements Cloneable
    *  will be mapped to S2 if input i in sate S1 leads to state
    *  S2.
    */
-  public final Map<Map<State, Input>, State> transtbl;
+  private final Map<Map<State, Input>, State> transtbl;
 
   @Override
   public DFA clone() { return new DFA( this ); }

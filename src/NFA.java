@@ -7,9 +7,9 @@ public class NFA implements Cloneable
     private T[] _a = (T[]) new Object[1];
     private int _N = 0;
 
-    public boolean isEmpty()  { return _N == 0;   }
-    public int     size()     { return _N;        }
-    public int     capacity() { return _a.length; }
+    boolean isEmpty()  { return _N == 0;   }
+    int     size()     { return _N;        }
+    int     capacity() { return _a.length; }
 
     private void _resize( int new_sz )
     {
@@ -23,13 +23,13 @@ public class NFA implements Cloneable
       _a = buffer;
     }
 
-    public void push( T ele )
+    void push(T ele)
     {
       if ( size() == capacity() ) _resize( capacity() * 2 );
       _a[_N++] = ele;
     }
 
-    public T pop()
+    T pop()
     {
       T popped = _a[--_N];
 
@@ -40,8 +40,8 @@ public class NFA implements Cloneable
     }
   }
 
-  public State start;
-  public State end;
+  private State start;
+  private State end;
 
   private final Vector<Vector<Input>> transtbl;
 
@@ -188,7 +188,7 @@ public class NFA implements Cloneable
 
   /** Appends a new, empty state to the NFA.
    */
-  public void appendEmptyState()
+  private void _appendEmptyState()
   {
     Vector<Input> newrow = new Vector<>( count() + 1 );
     for ( int i = 0; i < count(); i++ ) { newrow.add( Input.NONE ); }
@@ -210,7 +210,7 @@ public class NFA implements Cloneable
    *  doesn't affect the NFA, it only makes it larger and renames
    *  its states.
    */
-  public void shiftStates( int shift )
+  private void _shiftStates( int shift )
   {
     if ( shift < 1 ) { return; }
 
@@ -234,7 +234,7 @@ public class NFA implements Cloneable
 
   /** Fills states 0 up to src.count() with src's states.
    */
-  public void fillStates( NFA nfa )
+  private void _fillStates( NFA nfa )
   {
     NFA src = nfa.clone();
     NFA dst = this;
@@ -313,17 +313,17 @@ public class NFA implements Cloneable
     // new initial state, then nfa1's states, then nfa2's states,
     // then the new final state.
 
-    nfa1.shiftStates( 1 );            // make room for the new initial state
-    nfa2.shiftStates( nfa1.count() ); // make room for nfa1's states
+    nfa1._shiftStates( 1 );            // make room for the new initial state
+    nfa2._shiftStates( nfa1.count() ); // make room for nfa1's states
 
     NFA nfaUnion = new NFA( nfa2 );   // create a new nfa and initialize it
-    nfaUnion.fillStates( nfa1 );      // nfa1's states take their places in the new nfa
+    nfaUnion._fillStates( nfa1 );      // nfa1's states take their places in the new nfa
 
     nfaUnion.addTransition( 0, nfa1.start, Input.EPS );
     nfaUnion.addTransition( 0, nfa2.start, Input.EPS );
     nfaUnion.start = State.ZERO;
 
-    nfaUnion.appendEmptyState();
+    nfaUnion._appendEmptyState();
     nfaUnion.end = new State( nfaUnion.count() - 1 );
 
     nfaUnion.addTransition( nfa1.end, nfaUnion.end, Input.EPS );
@@ -341,7 +341,7 @@ public class NFA implements Cloneable
     // nfa2 (nfa2's initial state would be overlapped with nfa1's
     // final state
     //
-    nfa2.shiftStates( nfa1.count() - 1 );
+    nfa2._shiftStates( nfa1.count() - 1 );
 
     NFA nfaConcat = new NFA( nfa2 );
 
@@ -350,7 +350,7 @@ public class NFA implements Cloneable
     // the desired merge automagically (the transition from
     // nfa2's initial state now transits from nfa1's final state)
     // 
-    nfaConcat.fillStates( nfa1 );
+    nfaConcat._fillStates( nfa1 );
 
     // Set the new initial state (the final state stays nfa2's
     // final state, and was already copied)
@@ -364,11 +364,11 @@ public class NFA implements Cloneable
   {
     NFA nfa = n.clone();
 
-    nfa.shiftStates( 1 );
+    nfa._shiftStates( 1 );
 
     NFA nfaKleeneStar = new NFA( nfa );
-    nfaKleeneStar.fillStates( nfa );
-    nfaKleeneStar.appendEmptyState();
+    nfaKleeneStar._fillStates( nfa );
+    nfaKleeneStar._appendEmptyState();
 
     nfaKleeneStar.start = State.ZERO;
     nfaKleeneStar.end = new State( nfaKleeneStar.count() - 1 );
@@ -502,8 +502,8 @@ public class NFA implements Cloneable
 
     nfa.dumpInternalTranstbl();
 
-    nfa.appendEmptyState(); nfa.dumpInternalTranstbl();
-    nfa.shiftStates( 3 );   nfa.dumpInternalTranstbl();
+    nfa._appendEmptyState(); nfa.dumpInternalTranstbl();
+    nfa._shiftStates( 3 );   nfa.dumpInternalTranstbl();
 
     NFA anotherNFA = new NFA( 4, 0, 3 );
 
@@ -515,7 +515,7 @@ public class NFA implements Cloneable
     anotherNFA.addTransition( 3, 1, new Input( 'a' ) );
 
     anotherNFA.dumpInternalTranstbl();
-    nfa.fillStates( anotherNFA ); nfa.dumpInternalTranstbl();
+    nfa._fillStates( anotherNFA ); nfa.dumpInternalTranstbl();
 
     // NFA regex_r = NFA.buildNFABasic( new Input( 'r' ) );
     NFA regex_s = NFA.buildNFABasic( new Input( 's' ) );

@@ -3,7 +3,7 @@ import java.util.*;
 final class DFA implements Cloneable
 {
   State      start = State.ZERO;
-  Set<State> ends = new HashSet<>();
+  Set<State> finalMarks = new HashSet<>();
 
   /** The DFA's transition table is implemented with a Map, that
    *  maps (State, Input) pairs to states. For example, (S1, i)
@@ -44,7 +44,7 @@ final class DFA implements Cloneable
     if ( in.length() == 0 )
     {
       Set<State> states = State.stateStates( currentState.subsetized().nfaStatesSet() );
-      states.retainAll( this.ends );
+      states.retainAll( this.finalMarks );
 
       return states.size() > 0;
     }
@@ -65,8 +65,8 @@ final class DFA implements Cloneable
     System.out.println( "DFA start state: " + this.start );
     System.out.println( "DFA final state(s): {" );
 
-    if ( this.ends.size() > 0 )
-      for ( State sf : this.ends )
+    if ( this.finalMarks.size() > 0 )
+      for ( State sf : this.finalMarks )
         System.out.println( "\t" + sf + "," );
 
     System.out.println( "}" );
@@ -82,9 +82,9 @@ final class DFA implements Cloneable
     dfa.addTransition( 1, 2, new Input( 's' ) );
     dfa.addTransition( 0, 0, new Input( 'b' ) );
 
-    dfa.ends.add( State.ZERO );
-    dfa.ends.add( new State( 1 ) );
-    dfa.ends.add( new State( 2 ) );
+    dfa.finalMarks.add( State.ZERO );
+    dfa.finalMarks.add( new State( 1 ) );
+    dfa.finalMarks.add( new State( 2 ) );
 
     try {
       dfa.addTransition( 1, 2, Input.EPS );

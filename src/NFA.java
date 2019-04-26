@@ -95,35 +95,35 @@ final class NFA implements Cloneable
   private boolean _isLegalState( int s ) { return s >= 0 || s < count(); }
 
   private Map<Map<State, Input>, State>
-  _subsetConstruction( State cur_state, final Map<Map<State, Input>, State> partial_dfa_rep )
+  _subsetConstruction( State cur_dstate, final Map<Map<State, Input>, State> partial_dfa_rep )
   {
     if ( partial_dfa_rep == null )
       throw new IllegalArgumentException( "partial_dfa_rep must not be null" );
 
-    Set<State> next_states = new HashSet<>();
+    Set<State> next_dstates = new HashSet<>();
 
     for ( Input in : this.inputs )
     {
       HashSet buffer = new HashSet();
 
-      for ( State cs : State.stateStates( cur_state.nfaStatesSet() ) )
+      for ( State cs : State.stateStates( cur_dstate.nfaStatesSet() ) )
       {
-        buffer.addAll( _nextStates( new HashSet(){{ add( cs ); }}, in ) );
+        buffer.addAll( _nextNStates( new HashSet(){{ add( cs ); }}, in ) );
         buffer.addAll( _epsClosure( buffer ) );
       }
 
-      State ns = new State( State.integerStates( buffer ) );
-      HashMap from_key = new HashMap(){{ put( cur_state, in ); }};
+      State next_dstate = new State( State.integerStates( buffer ) );
+      HashMap from_key = new HashMap(){{ put( cur_dstate, in ); }};
 
       if ( !partial_dfa_rep.containsKey( from_key ) )
       {
-        partial_dfa_rep.put( from_key, ns );
-        next_states.add( ns );
+        partial_dfa_rep.put( from_key, next_dstate );
+        next_dstates.add( next_dstate );
       }
     }
 
-    for ( State s : next_states )
-      partial_dfa_rep.putAll( _subsetConstruction( s, partial_dfa_rep ) );
+    for ( State ds : next_dstates )
+      partial_dfa_rep.putAll( _subsetConstruction( ds, partial_dfa_rep ) );
 
     return partial_dfa_rep;
   }
@@ -141,6 +141,7 @@ final class NFA implements Cloneable
 
     DFA dfa = new DFA();
     dfa.start = dfa_start_state;
+    dfa.finalMarks.add( this.end );
 
     Map<Map<State, Input>, State> dfa_rep = _subsetConstruction( dfa.start, new HashMap() );
 
@@ -149,9 +150,6 @@ final class NFA implements Cloneable
       for ( Map.Entry<State, Input> keyentry : entry.getKey().entrySet() )
         dfa.addTransition( keyentry.getKey(), entry.getValue(), keyentry.getValue() );
     }
-
-    dfa.ends.add( this.end );
-
     return dfa;
   }
 
@@ -459,7 +457,7 @@ final class NFA implements Cloneable
    *  like to know which states in the NFA are reachable from T
    *  with the input A.
    */
-  public Set<State> _nextStates( Set<State> T, Input A )
+  public Set<State> _nextNStates( Set<State> T, Input A )
   {
     // The function traverses the set T, and looks for
     // transitions on the given input, returning the states that
@@ -562,7 +560,7 @@ final class NFA implements Cloneable
     Set<State> s = new HashSet<>();
     s.add( new State( 6 ) );
     // System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
-    // System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
+    // System.out.println( s = regex_s_OR_t_STAR_stt._nextNStates( s, new Input( 's' ) ) );
 
     DFA dfa = regex_s_OR_t_STAR_stt.dfa();
     dfa.show();

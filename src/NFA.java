@@ -144,6 +144,8 @@ final class NFA implements Cloneable
         dfa.addTransition( keyentry.getKey(), entry.getValue(), keyentry.getValue() );
     }
 
+    dfa.ends.add( this.end );
+
     return dfa;
   }
 
@@ -557,7 +559,6 @@ final class NFA implements Cloneable
     // System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
 
     DFA dfa = regex_s_OR_t_STAR_stt.dfa();
-    dfa.ends.add( new State( 10 ) );
     dfa.show();
     System.out.println( dfa.simulate( "sststststtstt" ) );
   }

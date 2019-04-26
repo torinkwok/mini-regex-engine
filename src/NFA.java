@@ -100,44 +100,41 @@ public class NFA implements Cloneable
     if ( partial_dfa_rep == null )
       throw new IllegalArgumentException( "partial_dfa_rep must not be null" );
 
-    Set<State> result_states = new HashSet<>();
+    Set<State> next_states = new HashSet<>();
 
     for ( Input in : this.inputs )
     {
-      HashSet next_states = new HashSet();
+      HashSet buffer = new HashSet();
 
       for ( State cs : State.stateStates( cur_state.nfaStatesSet() ) )
       {
-        HashSet states = new HashSet(){{ add( cs ); }};
-        next_states.addAll( _nextStates( states, in ) );
-        next_states.addAll( _epsClosure( next_states ) );
+        buffer.addAll( _nextStates( new HashSet(){{ add( cs ); }}, in ) );
+        buffer.addAll( _epsClosure( buffer ) );
       }
 
-      State ns = new State( State.integerStates( next_states ) );
+      State ns = new State( State.integerStates( buffer ) );
       HashMap from_key = new HashMap(){{ put( cur_state, in ); }};
 
       if ( !partial_dfa_rep.containsKey( from_key ) )
       {
         partial_dfa_rep.put( from_key, ns );
-        result_states.add( ns );
+        next_states.add( ns );
       }
     }
 
-    for ( State s : result_states )
+    for ( State s : next_states )
       partial_dfa_rep.putAll( _subsetConstruction( s, partial_dfa_rep ) );
 
     return partial_dfa_rep;
   }
 
-  public DFA subsetConstruction()
+  public DFA dfa()
   {
     State dfa_start_state = new State(
       State.integerStates( _epsClosure( new HashSet(){{ add( start ); }} ) ) );
 
     DFA dfa = new DFA();
     dfa.start = dfa_start_state;
-
-    System.out.println( _subsetConstruction( dfa.start, new HashMap() ) );
 
     Map<Map<State, Input>, State> dfa_rep = _subsetConstruction( dfa.start, new HashMap() );
 
@@ -559,7 +556,7 @@ public class NFA implements Cloneable
     // System.out.println( s = regex_s_OR_t_STAR_stt._epsClosure( s ) );
     // System.out.println( s = regex_s_OR_t_STAR_stt._nextStates( s, new Input( 's' ) ) );
 
-    DFA dfa = regex_s_OR_t_STAR_stt.subsetConstruction();
+    DFA dfa = regex_s_OR_t_STAR_stt.dfa();
     dfa.ends.add( new State( 10 ) );
     dfa.show();
     System.out.println( dfa.simulate( "sststststtstt" ) );

@@ -94,41 +94,12 @@ public class NFA implements Cloneable
   public int count() { return transtbl.size(); }
   private boolean _isLegalState( int s ) { return s >= 0 || s < count(); }
 
-  private Map<Map<State, Input>, State> _subsetConstruction( DFA dfa, State state )
-  {
-    Map<Map<State, Input>, State> result = null;
-
-    for ( Input in : this.inputs )
-    {
-      Set<State> next_states = new HashSet();
-      for ( int sn : state.nfaStatesSet() )
-      {
-        State s = new State( sn );
-
-        Set<State> states = new HashSet(){{ add( s ); }};
-        next_states.addAll( _nextStates( states, in ) );
-        next_states.addAll( _epsClosure( next_states ) );
-      }
-
-      State ns = new State( State.integerStates( next_states ) );
-      Map<State, Input> k = new HashMap(){{ put( state, in ); }};
-
-      if ( !dfa.transtbl.containsKey( k ) )
-      {
-        dfa.addTransition( state, ns, in );
-
-        if ( result == null ) result = new HashMap<>();
-        result.put( k, ns );
-      }
-    }
-
-    return result;
-  }
-
   private Map<Map<State, Input>, State>
-  _rSubsetConstruction( State cur_state, Map<Map<State, Input>, State> partial_dfa_rep )
+  _subsetConstruction( State cur_state, final Map<Map<State, Input>, State> partial_dfa_rep )
   {
-    Map<Map<State, Input>, State> dfa_rep = new HashMap<>();
+    if ( partial_dfa_rep == null )
+      throw new IllegalArgumentException( "partial_dfa_rep must not be null" );
+
     Set<State> result_states = new HashSet<>();
 
     for ( Input in : this.inputs )
@@ -145,28 +116,17 @@ public class NFA implements Cloneable
       State ns = new State( State.integerStates( next_states ) );
       HashMap from_key = new HashMap(){{ put( cur_state, in ); }};
 
-      if ( partial_dfa_rep == null ) partial_dfa_rep = new HashMap();
-
       if ( !partial_dfa_rep.containsKey( from_key ) )
       {
         partial_dfa_rep.put( from_key, ns );
-
-        dfa_rep.put( from_key, ns );
         result_states.add( ns );
       }
     }
 
     for ( State s : result_states )
-    {
-      HashMap new_partial_dfa_rep = new HashMap();
+      partial_dfa_rep.putAll( _subsetConstruction( s, partial_dfa_rep ) );
 
-      new_partial_dfa_rep.putAll( dfa_rep );
-      new_partial_dfa_rep.putAll( partial_dfa_rep );
-
-      dfa_rep.putAll( _rSubsetConstruction( s, new_partial_dfa_rep ) );
-    }
-
-    return dfa_rep;
+    return partial_dfa_rep;
   }
 
   public DFA subsetConstruction()
@@ -177,9 +137,9 @@ public class NFA implements Cloneable
     DFA dfa = new DFA();
     dfa.start = dfa_start_state;
 
-    System.out.println( _rSubsetConstruction( dfa.start, null ) );
+    System.out.println( _subsetConstruction( dfa.start, new HashMap() ) );
 
-    Map<Map<State, Input>, State> dfa_rep = _rSubsetConstruction( dfa.start, null );
+    Map<Map<State, Input>, State> dfa_rep = _subsetConstruction( dfa.start, new HashMap() );
 
     for ( Map.Entry<Map<State, Input>, State> entry : dfa_rep.entrySet() )
     {

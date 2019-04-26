@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class NFA implements Cloneable
+final class NFA implements Cloneable
 {
   private class AdHocStack<T>
   {

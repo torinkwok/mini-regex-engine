@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class State implements Cloneable
+final class State implements Cloneable
 {
   private class AdHocNullable<T> implements Cloneable
   {

@@ -1,6 +1,6 @@
 import java.util.*;
 
-public final class Input
+final class Input
 {
   public final Character v;
 

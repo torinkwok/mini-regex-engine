@@ -1,9 +1,9 @@
 import java.util.*;
 
-public class DFA implements Cloneable
+final class DFA implements Cloneable
 {
-  public State      start = State.ZERO;
-  public Set<State> ends = new HashSet<>();
+  State      start = State.ZERO;
+  Set<State> ends = new HashSet<>();
 
   /** The DFA's transition table is implemented with a Map, that
    *  maps (State, Input) pairs to states. For example, (S1, i)

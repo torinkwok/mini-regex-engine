@@ -130,6 +130,12 @@ final class NFA implements Cloneable
 
   public DFA dfa()
   {
+    // It starts by creating the initial state for the DFA. Since
+    // an initial state is really the NFA's initial state plus
+    // all the states reachable by *eps* transitions from it. The
+    // DFA initial state is the eps-closure of the NFA's initial
+    // state.
+
     State dfa_start_state = new State(
       State.integerStates( _epsClosure( new HashSet(){{ add( start ); }} ) ) );
 
